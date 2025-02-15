@@ -20,13 +20,26 @@ using namespace std;
 
 //Global Constants - No Global Variables
 //Only Universal Constants, Math, Physics, Conversions, Higher Dimensions
+
+// Function Prototypes
+void roll(int [], int);             // Role dice with no hold
+void roll(int [], char[], int);     // Role dice with hold
+void dispDce(int [], int);          // Display dice
+void getHold(char[], int);          // Ask the player if they would like to hold each dice
+int turnScore(int [], int, int);    // Get the score for the turn
+
 int main(int argc, char** argv) {
     // Set Random Number seed
     srand(static_cast<unsigned int>(time(0)));
 
+    const int bnsCut = 63; // The minimum score the player must earn to get the bonus
+    const int bnsScr = 35; // The bonus score the player earns if they meet the cutoff
+    const string fileNme = "avgData.dat";
+    const int numDice = 5;
+
     //Declare Variables
-    int dice1, dice2, dice3, dice4, dice5; // The value of the dice
-    char hold1, hold2, hold3, hold4, hold5; // Wether or not the user wants to hold each dice. 'Y' or 'y' for yes, anything else for no
+    int dice[numDice]; // The value of the dice
+    char hold[numDice]; // Wether or not the user wants to hold each dice. 'Y' or 'y' for yes, anything else for no
     int numSel; // The number the user selects to score this turn
     int turnScr; // The score for this turn
     int turnCnt; // The counter for how many turns the player had done
@@ -40,10 +53,6 @@ int main(int argc, char** argv) {
     float M2; // A helper variable stored in the average data file to calculate the standard deviation of the average total
     float stdDev; // The calculated standard deviation of the total score
 
-    const int bnsCut = 63; // The minimum score the player must earn to get the bonus
-    const int bnsScr = 35; // The bonus score the player earns if they meet the cutoff
-    const string fileNme = "avgData.dat";
-
     //Initialize Variables
     score1 = score2 = score3 = score4 = score5 = score6 = 0; // Set the score for every number to 0
     done1 = done2 = done3 = done4 = done5 = done6 = false; // Set that no numbers have been scored
@@ -52,13 +61,6 @@ int main(int argc, char** argv) {
     // Run the game
     // Run the loop until all numbers have been scored
     while (done1 == false || done2 == false || done3 == false || done4 == false || done5 == false || done6 == false) {
-        // Set the hold values all to no. This way all the dice will be rolled on the first roll. 
-        hold1 = 'n';
-        hold2 = 'n';
-        hold3 = 'n';
-        hold4 = 'n';
-        hold5 = 'n';
-
         // Display turn count and current scores
         cout << "Turn " << turnCnt << endl;
         turnCnt++;
@@ -91,37 +93,16 @@ int main(int argc, char** argv) {
         // Loop 3 times because each turn in yahtzee allows three roles
         for (int i = 0; i < 3; i++) {
             cout << "Roll " << i+1 << endl;
-            // Role each of the dice. If hold is set to yes, then hold the value and don't role. 
-            if (!(hold1 == 'Y' || hold1 == 'y')) dice1 = rand() % 6 + 1;
-            if (!(hold2 == 'Y' || hold2 == 'y')) dice2 = rand() % 6 + 1;
-            if (!(hold3 == 'Y' || hold3 == 'y')) dice3 = rand() % 6 + 1;
-            if (!(hold4 == 'Y' || hold4 == 'y')) dice4 = rand() % 6 + 1;
-            if (!(hold5 == 'Y' || hold5 == 'y')) dice5 = rand() % 6 + 1;
+            
+            if (i == 0) roll(dice, numDice);
+            else roll(dice, hold, numDice);
 
             // Display the value of each of the dice
-            cout << "Dice 1: "  <<  dice1 << endl;
-            cout << "Dice 2: "  <<  dice2 << endl;
-            cout << "Dice 3: "  <<  dice3 << endl;
-            cout << "Dice 4: "  <<  dice4 << endl;
-            cout << "Dice 5: "  <<  dice5 << endl;
+            dispDce(dice, numDice);
 
             // Don't ask about holding on the third role (there are no more rolls so holding wouldn't do anything)
             if (i != 2) { 
-                // Ask if the user would like to hold dice 1
-                cout << "Would you like to hold dice 1? (Y or N): ";
-                cin >> hold1;
-                // Ask if the user would like to hold dice 2
-                cout << "Would you like to hold dice 2? (Y or N): ";
-                cin >> hold2;
-                // Ask if the user would like to hold dice 3
-                cout << "Would you like to hold dice 3? (Y or N): ";
-                cin >> hold3;
-                // Ask if the user would like to hold dice 4
-                cout << "Would you like to hold dice 4? (Y or N): ";
-                cin >> hold4;
-                // Ask if the user would like to hold dice 5
-                cout << "Would you like to hold dice 5? (Y or N): ";
-                cin >> hold5;
+                getHold(hold, numDice);
             }
             cout << endl;
         }
@@ -136,12 +117,7 @@ int main(int argc, char** argv) {
             else if ((numSel == 1 && done1) || (numSel == 2 && done2) || (numSel == 3 && done3) || (numSel == 4 && done4) || (numSel == 5 && done5) || (numSel == 6 && done6)) cout << "Selected number has already been scored" << endl;
         } while (numSel < 1 || numSel > 6 || (numSel == 1 && done1) || (numSel == 2 && done2) || (numSel == 3 && done3) || (numSel == 4 && done4) || (numSel == 5 && done5) || (numSel == 6 && done6));
 
-        turnScr = 0; 
-        if (dice1 == numSel) turnScr += numSel;
-        if (dice2 == numSel) turnScr += numSel;
-        if (dice3 == numSel) turnScr += numSel;
-        if (dice4 == numSel) turnScr += numSel;
-        if (dice5 == numSel) turnScr += numSel;
+        turnScr = turnScore(dice, numDice, numSel);
 
         // Output the number of points earned for the user to see
         // Save the number of points in the variable for the row
@@ -252,4 +228,40 @@ int main(int argc, char** argv) {
 
     //Exit the Program
     return 0;
+}
+
+
+
+void roll(int dice[], int numDice) {
+    for (int i = 0; i < numDice; i++) {
+        dice[i] = rand() % 6 + 1;
+    }
+}
+
+void roll(int dice[], char hold[], int numDice) {
+    for (int i = 0; i < numDice; i++) {
+        if (!(hold[i] == 'Y' || hold[i] == 'y')) dice[i] = rand() % 6 + 1;
+    }
+}
+
+void dispDce(int dice[], int numDice) {
+    for (int i = 0; i < numDice; i++) {
+        cout << "Dice " << i+1 << ": " << dice[i] << endl;
+    }
+}
+
+void getHold(char hold[], int numDice) {
+    for (int i = 0; i < numDice; i++) {
+        // Ask if the user would like to hold dice 1
+        cout << "Would you like to hold dice " << i+1 << "? (Y or N): ";
+        cin >> hold[i];
+    }
+}
+
+int turnScore(int dice[], int numDice, int numSel) {
+    int turnScr = 0;
+    for (int i = 0; i < numDice; i++) {
+        if (dice[i] == numSel) turnScr += numSel;
+    }
+    return turnScr;
 }
