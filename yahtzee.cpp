@@ -39,6 +39,10 @@ int turnScore(int [], int, int);                // Get the score for the turn
 vector<int> getDiceVals(int [], int);           // Get the number of each value of dice
 int linearSearch(vector<int>, int);
 
+int totalScore(int [], int[], int, int, int &, int &, int&, int&);
+
+void dispFin(int [], int [], int, int, int, int, int);
+
 int main(int argc, char** argv) {
     // Set Random Number seed
     srand(static_cast<unsigned int>(time(0)));
@@ -62,7 +66,9 @@ int main(int argc, char** argv) {
     int lwrScr[numLwrR]; // The score for each of numbers on a die
     bool lwrDone[numLwrR]; // Bool to store if a certain number has been scored
     
-    int uppSum, bonus, uppTtl; // The sum of all the scores, the bonus points, and the total score for the game
+    int uppSum, uppBns, uppTtl; // The sum of all the scores, the bonus points, and the total score for the game
+    int lwrTtl;
+    int total;
 
     int count; // The count that will be read from the average data file
     int ttl1, ttl2, ttl3, ttl4, ttl5, ttl6, ttlSum, ttlBns, ttlTtl; // The total that is read from the average data file
@@ -114,76 +120,60 @@ int main(int argc, char** argv) {
         turnScr = turnScore(dice, numDice, numSel);
         updateScore(uppScr, uppDone, lwrScr, lwrDone, turnScr, numSel);
     }
-    // After all the scores have been filled in, compute the score and output a nicely formatted score card. 
-    uppSum = 0;
-    for (int i = 0; i < numUppR; i++) {
-        uppSum += uppScr[i];
-    }
-    if (uppSum >= bnsCut) bonus = 35; else bonus = 0;
-    uppTtl = uppSum + bonus;
 
-    // Display the score for the game
-    cout << "Your score for this game:" << endl;
-    cout << "ACES:   " << setw(3) << uppScr[0] << endl;
-    cout << "TWOS:   " << setw(3) << uppScr[1] << endl;
-    cout << "THREES: " << setw(3) << uppScr[2] << endl;
-    cout << "FOURS:  " << setw(3) << uppScr[3] << endl;
-    cout << "FIVES:  " << setw(3) << uppScr[4] << endl;
-    cout << "SIXES:  " << setw(3) << uppScr[5] << endl;
-    cout << "-----------" << endl;
-    cout << "SCORE:  " << setw(3) << uppSum << endl;
-    cout << "BONUS:  " << setw(3) << bonus << endl;
-    cout << "TOTAL:  " << setw(3) << uppTtl << endl << endl << endl;
+    total = totalScore(uppScr, lwrScr, numUppR, numLwrR, uppSum, uppBns, uppTtl, lwrTtl);
 
-    // Open the average data file, then read the count, totals, and M2
-    ifstream avgIn(fileNme);
-    avgIn >> count >> ttl1 >> ttl2 >> ttl3 >> ttl4 >> ttl5 >> ttl6 >> ttlSum >> ttlBns >> ttlTtl >> M2;
-    avgIn.close();
+    dispFin(uppScr, lwrScr, uppSum, uppBns, uppTtl, lwrTtl, total);
 
-    // Update the count and totals
-    count++;
-    ttl1 += uppScr[0];
-    ttl2 += uppScr[1];
-    ttl3 += uppScr[2];
-    ttl4 += uppScr[3];
-    ttl5 += uppScr[4];
-    ttl6 += uppScr[5];
-    ttlSum += uppSum;
-    ttlBns += bonus;
-    ttlTtl += uppTtl;
+    // // Open the average data file, then read the count, totals, and M2
+    // ifstream avgIn(fileNme);
+    // avgIn >> count >> ttl1 >> ttl2 >> ttl3 >> ttl4 >> ttl5 >> ttl6 >> ttlSum >> ttlBns >> ttlTtl >> M2;
+    // avgIn.close();
 
-    // Calculate the average of all the scores 
-    avg1 = (float)ttl1/float(count);
-    avg2 = (float)ttl2/float(count);
-    avg3 = (float)ttl3/float(count);
-    avg4 = (float)ttl4/float(count);
-    avg5 = (float)ttl5/float(count);
-    avg6 = (float)ttl6/float(count);
-    avgSum = (float)ttlSum/float(count);
-    avgBns = (float)ttlBns/float(count);
-    avgTtl = (float)ttlTtl/float(count);
-    // Calculate the standard deviation of the total score
-    M2 += pow(uppTtl - avgTtl, 2);
-    stdDev = (count > 1) ? sqrt(M2/(count-1)) : 0;
+    // // Update the count and totals
+    // count++;
+    // ttl1 += uppScr[0];
+    // ttl2 += uppScr[1];
+    // ttl3 += uppScr[2];
+    // ttl4 += uppScr[3];
+    // ttl5 += uppScr[4];
+    // ttl6 += uppScr[5];
+    // ttlSum += uppSum;
+    // ttlBns += bonus;
+    // ttlTtl += uppTtl;
 
-    // Store the updated count and totals into the file
-    ofstream avgOut(fileNme);
-    avgOut << count << " " << ttl1 << " " << ttl2 << " " << ttl3 << " " << ttl4 << " " << ttl5 << " " << ttl6 << " " << ttlSum << " " << ttlBns << " " << ttlTtl << " " << M2;
-    avgOut.close();
+    // // Calculate the average of all the scores 
+    // avg1 = (float)ttl1/float(count);
+    // avg2 = (float)ttl2/float(count);
+    // avg3 = (float)ttl3/float(count);
+    // avg4 = (float)ttl4/float(count);
+    // avg5 = (float)ttl5/float(count);
+    // avg6 = (float)ttl6/float(count);
+    // avgSum = (float)ttlSum/float(count);
+    // avgBns = (float)ttlBns/float(count);
+    // avgTtl = (float)ttlTtl/float(count);
+    // // Calculate the standard deviation of the total score
+    // M2 += pow(uppTtl - avgTtl, 2);
+    // stdDev = (count > 1) ? sqrt(M2/(count-1)) : 0;
 
-    // Output the average score in the same formatting as the users score
-    cout << "The average score of games played:" << endl;
-    cout << "ACES:   " << setw(3) << avg1 << endl;
-    cout << "TWOS:   " << setw(3) << avg2 << endl;
-    cout << "THREES: " << setw(3) << avg3 << endl;
-    cout << "FOURS:  " << setw(3) << avg4 << endl;
-    cout << "FIVES:  " << setw(3) << avg5 << endl;
-    cout << "SIXES:  " << setw(3) << avg6 << endl;
-    cout << "-----------" << endl;
-    cout << "SCORE:  " << setw(3) << avgSum << endl;
-    cout << "BONUS:  " << setw(3) << avgBns << endl;
-    cout << "TOTAL:  " << setw(3) << avgTtl << endl;
-    cout << "The standard deviation of the total scores is: " << stdDev << endl;
+    // // Store the updated count and totals into the file
+    // ofstream avgOut(fileNme);
+    // avgOut << count << " " << ttl1 << " " << ttl2 << " " << ttl3 << " " << ttl4 << " " << ttl5 << " " << ttl6 << " " << ttlSum << " " << ttlBns << " " << ttlTtl << " " << M2;
+    // avgOut.close();
+
+    // // Output the average score in the same formatting as the users score
+    // cout << "The average score of games played:" << endl;
+    // cout << "ACES:   " << setw(3) << avg1 << endl;
+    // cout << "TWOS:   " << setw(3) << avg2 << endl;
+    // cout << "THREES: " << setw(3) << avg3 << endl;
+    // cout << "FOURS:  " << setw(3) << avg4 << endl;
+    // cout << "FIVES:  " << setw(3) << avg5 << endl;
+    // cout << "SIXES:  " << setw(3) << avg6 << endl;
+    // cout << "-----------" << endl;
+    // cout << "SCORE:  " << setw(3) << avgSum << endl;
+    // cout << "BONUS:  " << setw(3) << avgBns << endl;
+    // cout << "TOTAL:  " << setw(3) << avgTtl << endl;
+    // cout << "The standard deviation of the total scores is: " << stdDev << endl;
 
     //Exit the Program
     return 0;
@@ -492,4 +482,52 @@ void updateScore(int uppScr[], bool uppDone[], int lwrScr[], bool lwrDone[], int
     default:
         break;
     }
+}
+
+int totalScore(int uppScr[], int lwrScr[], int numUppR, int numLwrR, int &uppSum, int &uppBns, int &uppTtl, int &lwrTtl) {
+    const int bnsCut = 35;
+
+    // After all the scores have been filled in, compute the score and output a nicely formatted score card. 
+    uppSum = 0;
+    for (int i = 0; i < numUppR; i++) {
+        uppSum += uppScr[i];
+    }
+    if (uppSum >= bnsCut) uppBns = 35; else uppBns = 0;
+    uppTtl = uppSum + uppBns;
+
+    lwrTtl = 0;
+    for (int i = 0; i < numLwrR; i++) {
+        lwrTtl += lwrScr[i];
+    }
+
+    return uppTtl + lwrTtl;
+}
+
+void dispFin(int uppScr[], int lwrScr[], int uppSum, int uppBns, int uppTtl, int lwrTtl, int total) {
+    // Display the score for the game
+    cout << "Your score for this game:" << endl;
+    cout << "UPPER SECTION:" << endl;
+    cout << "Aces:                   " << setw(3) << uppScr[0] << endl;
+    cout << "Twos:                   " << setw(3) << uppScr[1] << endl;
+    cout << "Threes:                 " << setw(3) << uppScr[2] << endl;
+    cout << "Fours:                  " << setw(3) << uppScr[3] << endl;
+    cout << "Fives:                  " << setw(3) << uppScr[4] << endl;
+    cout << "Sixes:                  " << setw(3) << uppScr[5] << endl;
+    cout << "------------------------" << endl;
+    cout << "TOTAL SCORE:            " << setw(3) << uppSum << endl;
+    cout << "BONUS:                  " << setw(3) << uppBns << endl;
+    cout << "TOTAL Of Upper Section: " << setw(3) << uppTtl << endl;
+    cout << endl;
+    cout << "LOWER SECTION:" << endl;
+    cout << "3 of a kind:            " << setw(3) << lwrScr[0] << endl;
+    cout << "4 of a kind:            " << setw(3) << lwrScr[1] << endl;
+    cout << "Full House:             " << setw(3) << lwrScr[2] << endl;
+    cout << "Small Straight:         " << setw(3) << lwrScr[3] << endl;
+    cout << "Large Straight:         " << setw(3) << lwrScr[4] << endl;
+    cout << "YAHTZEE:                " << setw(3) << lwrScr[5] << endl;
+    cout << "Chance:                 " << setw(3) << lwrScr[6] << endl;
+    cout << "------------------------" << endl;
+    cout << "TOTAL Of Lower Section: " << setw(3) << lwrTtl << endl;
+    cout << "TOTAL of Upper Section: " << setw(3) << uppTtl << endl;
+    cout << "GRAND TOTAL:            " << setw(3) << total << endl;
 }
