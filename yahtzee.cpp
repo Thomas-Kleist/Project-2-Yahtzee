@@ -31,6 +31,8 @@ bool gameDone(bool [], int);        // Get if the game is completed based on the
 void displayScore(int [], bool [], int);     // Display the current scores
 int selScore(bool [], int);         // Select which row to score
 void displayTurn();                 // Display the turn number
+void selSort(int [],int);           // Selection sort
+void bubSort(int [],int);           // Selection sort
 
 int main(int argc, char** argv) {
     // Set Random Number seed
@@ -78,6 +80,9 @@ int main(int argc, char** argv) {
             
             if (i == 0) roll(dice, numDice);
             else roll(dice, hold, numDice);
+
+            if (i == 0) selSort(dice, numDice);
+            if (i == 1) bubSort(dice, numDice);
 
             // Display the value of each of the dice
             dispDce(dice, numDice);
@@ -301,4 +306,33 @@ void displayTurn() {
     static int turn;
     turn++;
     cout << "Turn " << turn << endl;
+}
+
+void selSort(int a[],int n) {
+    for(int pos=0;pos<n-1;pos++){
+        int selIndx=pos;
+        for(int i=pos+1;i<n;i++){
+            if(*(a+selIndx)>*(a+i))selIndx=i;
+        }
+        int temp = a[selIndx];
+        a[selIndx] = a[pos];
+        a[pos] = temp;
+    }
+}
+
+void bubSort(int a[],int n){
+    bool swap;
+    int redList=n-1;
+    do{
+        swap=false;
+        for(int i=0;i<redList;i++){
+            if(a[i]>a[i+1]){
+                int temp = a[i];
+                a[i] = a[i+1];
+                a[i+1] = temp;
+                swap=true;
+            }
+        } 
+       redList--;
+    }while(swap);
 }
