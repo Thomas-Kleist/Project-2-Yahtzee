@@ -27,6 +27,9 @@ void roll(int [], char[], int);     // Role dice with hold
 void dispDce(int [], int);          // Display dice
 void getHold(char[], int);          // Ask the player if they would like to hold each dice
 int turnScore(int [], int, int);    // Get the score for the turn
+bool gameDone(bool [], int);        // Get if the game is completed based on the row completion
+void displayScore(int [], bool [], int);     // Display the current scores
+int selScore(bool [], int);        // Select which row to score
 
 int main(int argc, char** argv) {
     // Set Random Number seed
@@ -36,6 +39,7 @@ int main(int argc, char** argv) {
     const int bnsScr = 35; // The bonus score the player earns if they meet the cutoff
     const string fileNme = "avgData.dat";
     const int numDice = 5;
+    const int numUppR = 6;
 
     //Declare Variables
     int dice[numDice]; // The value of the dice
@@ -43,9 +47,9 @@ int main(int argc, char** argv) {
     int numSel; // The number the user selects to score this turn
     int turnScr; // The score for this turn
     int turnCnt; // The counter for how many turns the player had done
-    int score1, score2, score3, score4, score5, score6; // The score for each of numbers on a die
-    bool done1, done2, done3, done4, done5, done6; // Bool to store if a certain number has been scored
-    int sum, bonus, ttl; // The sum of all the scores, the bonus points, and the total score for the game
+    int uppScr[numUppR]; // The score for each of numbers on a die
+    bool uppDone[numUppR]; // Bool to store if a certain number has been scored
+    int uppSum, bonus, uppTtl; // The sum of all the scores, the bonus points, and the total score for the game
 
     int count; // The count that will be read from the average data file
     int ttl1, ttl2, ttl3, ttl4, ttl5, ttl6, ttlSum, ttlBns, ttlTtl; // The total that is read from the average data file
@@ -54,41 +58,20 @@ int main(int argc, char** argv) {
     float stdDev; // The calculated standard deviation of the total score
 
     //Initialize Variables
-    score1 = score2 = score3 = score4 = score5 = score6 = 0; // Set the score for every number to 0
-    done1 = done2 = done3 = done4 = done5 = done6 = false; // Set that no numbers have been scored
+    for (int i = 0; i < numUppR; i++) {
+        uppScr[i] = 0;
+        uppDone[i] = false;
+    }
     turnCnt = 1; // Set it to the first turn
 
     // Run the game
     // Run the loop until all numbers have been scored
-    while (done1 == false || done2 == false || done3 == false || done4 == false || done5 == false || done6 == false) {
+    while (!gameDone(uppDone, numUppR)) {
         // Display turn count and current scores
         cout << "Turn " << turnCnt << endl;
         turnCnt++;
-        cout << "Current Scores:" << endl;
-        // Show score in ACES row or leave blank if not scored yet
-        cout << "ACES:   ";
-        if (done1) cout << setw(2) << score1;
-        cout << endl;
-        // Show score in TWOS row or leave blank if not scored yet
-        cout << "TWOS:   ";
-        if (done2) cout << setw(2) << score2;
-        cout << endl;
-        // Show score in THREES row or leave blank if not scored yet
-        cout << "THREES: ";
-        if (done3) cout << setw(2) << score3;
-        cout << endl;
-        // Show score in FOURS row or leave blank if not scored yet
-        cout << "FOURS:  ";
-        if (done4) cout << setw(2) << score4;
-        cout << endl;
-        // Show score in FIVES row or leave blank if not scored yet
-        cout << "FIVES:  ";
-        if (done5) cout << setw(2) << score5;
-        cout << endl;
-        // Show score in SIXES row or leave blank if not scored yet
-        cout << "SIXES:  ";
-        if (done6) cout << setw(2) << score6;
-        cout << endl << endl;
+
+        displayScore(uppScr, uppDone, numUppR);
 
         // Loop 3 times because each turn in yahtzee allows three roles
         for (int i = 0; i < 3; i++) {
@@ -110,13 +93,7 @@ int main(int argc, char** argv) {
         // After rolling three times, select which number the user would like to score in
         // If the number selected is out of range, ask them to input again
         // If the number they selected has already been scored, ask them to input again
-        do {
-            cout << "What number would you like to score this turn? (1-6): ";
-            cin >> numSel; 
-            if (numSel < 1 || numSel > 6) cout << "Selected number out of range" << endl;
-            else if ((numSel == 1 && done1) || (numSel == 2 && done2) || (numSel == 3 && done3) || (numSel == 4 && done4) || (numSel == 5 && done5) || (numSel == 6 && done6)) cout << "Selected number has already been scored" << endl;
-        } while (numSel < 1 || numSel > 6 || (numSel == 1 && done1) || (numSel == 2 && done2) || (numSel == 3 && done3) || (numSel == 4 && done4) || (numSel == 5 && done5) || (numSel == 6 && done6));
-
+        numSel = selScore(uppDone, numUppR);
         turnScr = turnScore(dice, numDice, numSel);
 
         // Output the number of points earned for the user to see
@@ -126,55 +103,58 @@ int main(int argc, char** argv) {
         {
         case 1:
             cout << "The number of points earned in the ACE row is " << turnScr << endl << endl << endl;
-            score1 = turnScr;
-            done1 = true;
+            uppScr[0] = turnScr;
+            uppDone[0] = true;
             break;
         case 2:
             cout << "The number of points earned in the TWOS row is " << turnScr << endl << endl << endl;
-            score2 = turnScr;
-            done2 = true;
+            uppScr[1] = turnScr;
+            uppDone[1] = true;
             break;
         case 3:
             cout << "The number of points earned in the THREES row is " << turnScr << endl << endl << endl;
-            score3 = turnScr;
-            done3 = true;
+            uppScr[2] = turnScr;
+            uppDone[2] = true;
             break;
         case 4:
             cout << "The number of points earned in the FOURS row is " << turnScr << endl << endl << endl;
-            score4 = turnScr;
-            done4 = true;
+            uppScr[3] = turnScr;
+            uppDone[3] = true;
             break;
         case 5:
             cout << "The number of points earned in the FIVES row is " << turnScr << endl << endl << endl;
-            score5 = turnScr;
-            done5 = true;
+            uppScr[4] = turnScr;
+            uppDone[4] = true;
             break;
         case 6:
             cout << "The number of points earned in the SIXES row is " << turnScr << endl << endl << endl;
-            score6 = turnScr;
-            done6 = true;
+            uppScr[5] = turnScr;
+            uppDone[5] = true;
             break;
         default:
             break;
         }
     }
     // After all the scores have been filled in, compute the score and output a nicely formatted score card. 
-    sum = score1 + score2 + score3 + score4 + score5 + score6;
-    if (sum >= bnsCut) bonus = 35; else bonus = 0;
-    ttl = sum + bonus;
+    uppSum = 0;
+    for (int i = 0; i < numUppR; i++) {
+        uppSum += uppScr[i];
+    }
+    if (uppSum >= bnsCut) bonus = 35; else bonus = 0;
+    uppTtl = uppSum + bonus;
 
     // Display the score for the game
     cout << "Your score for this game:" << endl;
-    cout << "ACES:   " << setw(3) << score1 << endl;
-    cout << "TWOS:   " << setw(3) << score2 << endl;
-    cout << "THREES: " << setw(3) << score3 << endl;
-    cout << "FOURS:  " << setw(3) << score4 << endl;
-    cout << "FIVES:  " << setw(3) << score5 << endl;
-    cout << "SIXES:  " << setw(3) << score6 << endl;
+    cout << "ACES:   " << setw(3) << uppScr[0] << endl;
+    cout << "TWOS:   " << setw(3) << uppScr[1] << endl;
+    cout << "THREES: " << setw(3) << uppScr[2] << endl;
+    cout << "FOURS:  " << setw(3) << uppScr[3] << endl;
+    cout << "FIVES:  " << setw(3) << uppScr[4] << endl;
+    cout << "SIXES:  " << setw(3) << uppScr[5] << endl;
     cout << "-----------" << endl;
-    cout << "SCORE:  " << setw(3) << sum << endl;
+    cout << "SCORE:  " << setw(3) << uppSum << endl;
     cout << "BONUS:  " << setw(3) << bonus << endl;
-    cout << "TOTAL:  " << setw(3) << ttl << endl << endl << endl;
+    cout << "TOTAL:  " << setw(3) << uppTtl << endl << endl << endl;
 
     // Open the average data file, then read the count, totals, and M2
     ifstream avgIn(fileNme);
@@ -183,15 +163,15 @@ int main(int argc, char** argv) {
 
     // Update the count and totals
     count++;
-    ttl1 += score1;
-    ttl2 += score2;
-    ttl3 += score3;
-    ttl4 += score4;
-    ttl5 += score5;
-    ttl6 += score6;
-    ttlSum += sum;
+    ttl1 += uppScr[0];
+    ttl2 += uppScr[1];
+    ttl3 += uppScr[2];
+    ttl4 += uppScr[3];
+    ttl5 += uppScr[4];
+    ttl6 += uppScr[5];
+    ttlSum += uppSum;
     ttlBns += bonus;
-    ttlTtl += ttl;
+    ttlTtl += uppTtl;
 
     // Calculate the average of all the scores 
     avg1 = (float)ttl1/float(count);
@@ -204,7 +184,7 @@ int main(int argc, char** argv) {
     avgBns = (float)ttlBns/float(count);
     avgTtl = (float)ttlTtl/float(count);
     // Calculate the standard deviation of the total score
-    M2 += pow(ttl - avgTtl, 2);
+    M2 += pow(uppTtl - avgTtl, 2);
     stdDev = (count > 1) ? sqrt(M2/(count-1)) : 0;
 
     // Store the updated count and totals into the file
@@ -264,4 +244,56 @@ int turnScore(int dice[], int numDice, int numSel) {
         if (dice[i] == numSel) turnScr += numSel;
     }
     return turnScr;
+}
+
+bool gameDone(bool uppDone[], int numUppR) {
+    bool done = true;
+    for (int i = 0; i < numUppR; i++) {
+        if (uppDone[i] == false) done = false;
+    }
+    return done;
+}
+
+void displayScore(int uppScr[], bool uppDone[], int numUppR) {
+    cout << "Current Scores:" << endl;
+
+    for (int i = 0; i < numUppR; i++) {
+        switch (i)
+        {
+        case 0:
+            cout << "ACES:   ";
+            break;
+        case 1:
+            cout << "TWOS:   ";
+            break;
+        case 2:
+            cout << "THREES: ";
+            break;
+        case 3:
+            cout << "FOURS:  ";
+            break;
+        case 4:
+            cout << "FIVES:  ";
+            break;
+        case 5:
+            cout << "SIXES:  ";
+            break;
+        default:
+            break;
+        }
+
+        if (uppDone[i]) cout << setw(2) << uppScr[i];
+        cout << endl;
+    }
+}
+
+int selScore(bool uppDone[], int numUppR) {
+    int numSel;
+    do {
+        cout << "Which row would you like to score this turn? (1-6): ";
+        cin >> numSel; 
+        if (numSel < 1 || numSel > 6) cout << "Selected number out of range" << endl;
+        else if (uppDone[numSel-1]) cout << "Selected number has already been scored" << endl;
+    } while (numSel < 1 || numSel > 6 || uppDone[numSel-1]);
+    return numSel;
 }
