@@ -29,7 +29,8 @@ void getHold(char[], int);          // Ask the player if they would like to hold
 int turnScore(int [], int, int);    // Get the score for the turn
 bool gameDone(bool [], int);        // Get if the game is completed based on the row completion
 void displayScore(int [], bool [], int);     // Display the current scores
-int selScore(bool [], int);        // Select which row to score
+int selScore(bool [], int);         // Select which row to score
+void displayTurn();                 // Display the turn number
 
 int main(int argc, char** argv) {
     // Set Random Number seed
@@ -68,9 +69,7 @@ int main(int argc, char** argv) {
     // Run the loop until all numbers have been scored
     while (!gameDone(uppDone, numUppR)) {
         // Display turn count and current scores
-        cout << "Turn " << turnCnt << endl;
-        turnCnt++;
-
+        displayTurn();
         displayScore(uppScr, uppDone, numUppR);
 
         // Loop 3 times because each turn in yahtzee allows three roles
@@ -296,4 +295,10 @@ int selScore(bool uppDone[], int numUppR) {
         else if (uppDone[numSel-1]) cout << "Selected number has already been scored" << endl;
     } while (numSel < 1 || numSel > 6 || uppDone[numSel-1]);
     return numSel;
+}
+
+void displayTurn() {
+    static int turn;
+    turn++;
+    cout << "Turn " << turn << endl;
 }
