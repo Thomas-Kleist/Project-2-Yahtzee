@@ -1,9 +1,9 @@
 /*
  * File: yahtzee_v7.cpp
  * Author: Thomas Kleist
- * Created on Feb 7, 2025, 10:00 AM
- * Purpose: To implement the upper section of YAHTZEE
- * Goal for V7: Output/Input average score, standard deviation
+ * Created on Feb 15, 2025, 8:00 AM
+ * Purpose: To implement YAHTZEE in C++
+ * Additions since project 1: Add lower section to game. Implement arrays and functions
  */
 
 //System Libraries
@@ -543,7 +543,6 @@ void avg(int scrSht[][2], int uppScr[], int lwrScr[], int uppSum, int uppBns, in
     lwrTtlT += lwrTtl;
 
     totalT += total;
-
 
     // Calculate the average of all the scores 
     avgs[0] = (float)uppTtls[0]/float(count);
