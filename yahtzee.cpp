@@ -1,5 +1,5 @@
 /*
- * File: yahtzee_v7.cpp
+ * File: yahtzee.cpp
  * Author: Thomas Kleist
  * Created on Feb 15, 2025, 8:00 AM
  * Purpose: To implement YAHTZEE in C++
@@ -27,7 +27,7 @@ void roll(int [], int);                                         // Role dice wit
 void roll(int [], char[], int);                                 // Role dice with hold
 void dispDce(int [], int);                                      // Display dice
 void getHold(char[], int);                                      // Ask the player if they would like to hold each dice
-bool gameDone(bool [], int, bool [], int);                      // Get if the game is completed based on the row completion
+bool gameDne(bool [], int, bool [], int);                      // Get if the game is completed based on the row completion
 void dispScr(int [], bool [], int, int [], bool [], int);       // Display the current scores
 void selRow(bool [], bool [], int&);                            // Select which row to score
 void dispTrn();                                                 // Display the turn number
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 
     // Run the game
     // Run the loop until all rows have been scored
-    while (!gameDone(uppDone, numUppR, lwrDone, numLwrR)) {
+    while (!gameDne(uppDone, numUppR, lwrDone, numLwrR)) {
         // Display turn count and current scores
         dispTrn();
         dispScr(uppScr, uppDone, numUppR, lwrScr, lwrDone, numLwrR);
@@ -241,7 +241,7 @@ vector<int> getCnt(int dice[], int numDice) {
 
 // Search for a specific value in a vector
 int linSrch(vector<int> vec, int target) {
-    for (size_t i = 0; i < vec.size(); ++i) { 
+    for (size_t i = 0; i < vec.size(); i++) { 
         if (vec[i] == target) {
             return (int)i; // Return the index if found
         }
@@ -250,7 +250,7 @@ int linSrch(vector<int> vec, int target) {
 }
 
 // Look through all the rows in the upper and lower section to see if all are completed
-bool gameDone(bool uppDone[], int numUppR, bool lwrDone[], int numLwrR) {
+bool gameDne(bool uppDone[], int numUppR, bool lwrDone[], int numLwrR) {
     bool done = true;
     for (int i = 0; i < numUppR; i++) {
         if (uppDone[i] == false) done = false;
